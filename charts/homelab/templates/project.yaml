@@ -1,0 +1,25 @@
+{{- range $appName, $app := $.Values.installers }}
+{{- if $app.createProject }}
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  labels:
+    {{- include "app-of-apps-installer.labels" $ | nindent 4 }}
+  name: {{ required "Project name is required." (tpl $app.project $) }}
+  namespace: {{ $.Release.Namespace }}
+spec:
+  clusterResourceWhitelist:
+  - group: '*'
+    kind: '*'
+  namespaceResourceWhitelist:
+  - group: '*'
+    kind: '*'
+  destinations:
+  - namespace: '*'
+    server: '*'
+  roles: []
+  sourceRepos:
+  - '*'
+---
+{{- end }}
+{{- end }}

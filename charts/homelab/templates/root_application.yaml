@@ -1,0 +1,59 @@
+{{- range $appName, $app := $.Values.installers }}
+{{- $environment := coalesce $app.environment $.Values.environment }}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  {{- if $app.appPrefix }}
+  name: "{{ tpl $app.appPrefix $ }}-{{ $app.name }}"
+  {{- else }}
+  name: {{ $app.name }}
+  {{- end }}
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  labels:
+    name: {{ $app.name }}
+    {{- include "app-of-apps-installer.labels" $ | nindent 4 }}
+spec:
+  project: {{ tpl $app.project $ }}
+  sources:
+  - repoURL: {{ required "appOfApps.chart.regisry is required." $app.chart.registry }}
+    targetRevision: {{ required "appOfApps.chart.targetRevisition" $app.chart.targetRevision }}
+    chart: {{ $app.chart.name }}
+    helm:
+      parameters:
+      - name: environment
+        value: {{ required "Missing vlaue for environment." $environment }}
+      {{- if $app.appPrefix }}
+      - name: appPrefix
+        value: {{ tpl $app.appPrefix $ }}
+      {{- end }}
+      valueFiles:
+      - $values/{{ $app.valuesPath }}/common.values.yaml
+      - $values/{{ $app.valuesPath }}/env/{{ $environment }}.values.yaml
+  - repoURL: {{ required "Misisng value for appOfApps.valuesRepo" $app.valuesRepo }}
+    targetRevision: {{ required "Missing valuesBranch." $app.valuesBranch }}
+    ref: values
+
+  destination:
+    name: in-cluster
+    namespace: argocd
+
+  syncPolicy:
+  {{- if not $app.disableAutoSync }}
+    automated:
+      prune: true
+  {{- end }}
+    syncOptions:
+    - CreateNamespace=true
+    {{- if $app.syncOptions }}
+    {{- $app.syncOptions | toYaml | nindent 4 }}
+    {{- end }}
+
+  revisionHistoryLimit: {{ $app.revisionHistoryLimit | default 0  }}
+
+  {{ if $app.ignoreDifferences }}
+  ignoreDifferences: {{ $app.ignoreDifferences | toYaml | nindent 4 }}
+  {{ end }}
+---
+{{- end }}

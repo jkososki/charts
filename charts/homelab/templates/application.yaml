@@ -1,0 +1,72 @@
+{{- $gitRepositories := .Values.gitRepositories -}}
+{{- $helmRegistries := .Values.helmRegistries -}}
+{{- $clusters := .Values.clusters -}}
+{{- range $appKey, $appVal := .Values.applications }}
+{{- if $appVal.enabled }}
+{{- $environment := coalesce $appVal.targetEnvironment $.Values.environment }}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  {{- $appName := "" }}
+  {{- if $appVal.nameTemplate }}
+  {{- $appName = tpl $appVal.nameTemplate $ -}}
+  {{- else }}
+  {{- $appName = $appVal.name -}}
+  {{- end }}
+  {{- if $appVal.appPrefix }}
+  name: "{{ $appVal.appPrefix }}-{{ $appName }}"
+  {{- else }}
+  name: "{{ $appName }}"
+  {{- end }}
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  labels:
+    {{- include "app-of-apps.labels" $ | nindent 4 }}
+  annotations:
+    argocd.argoproj.io/manifest-generate-paths: .
+spec:
+  project: {{ tpl $appVal.project $ }}
+  sources:
+  - repoURL: {{ index $helmRegistries (required (printf "Missing chart.registry for %s" $appKey) $appVal.chart.registry) }}
+    targetRevision: {{ required (printf "Missing chart.targetRevision for %s" $appKey) $appVal.chart.targetRevision }}
+    chart: {{ $appVal.chart.name }}
+    helm:
+      {{- if $appVal.skipCrds }}
+      skipCrds: true
+      {{- end }}
+      parameters:
+      - name: environment
+        value: {{ required "Missing vlaue for environment." $environment }}
+      - name: global.sindri_environment
+        value: {{ required "Missing vlaue for environment." $environment }}
+      valueFiles:
+      - $values/{{ $appVal.valuesPath }}/base.values.yaml
+      - $values/{{ $appVal.valuesPath }}/env/{{ $environment }}.values.yaml
+  - repoURL: {{ required (printf "Missing valuesRepo for %s" $appKey) (index $gitRepositories $appVal.valuesRepo) }}
+    targetRevision: {{ required "Missing valuesBranch." $.Values.valuesBranch }}
+    ref: values
+
+  destination:
+    name: {{ required (printf "Missing cluster for %s" $appKey) (tpl (index $clusters $appVal.destination.cluster) $) }}
+    namespace: {{ required (printf "Missing namespace for %s" $appKey) (tpl $appVal.destination.namespace $) }}
+
+  syncPolicy:
+  {{- if not $appVal.disableAutoSync }}
+    automated:
+      prune: true
+  {{- end }}
+    syncOptions:
+    - CreateNamespace=true
+    {{- if $appVal.syncOptions }}
+    {{- $appVal.syncOptions | toYaml | nindent 4 }}
+    {{- end }}
+
+  revisionHistoryLimit: {{ $appVal.revisionHistoryLimit | default 0  }}
+
+  {{ if $appVal.ignoreDifferences }}
+  ignoreDifferences: {{ $appVal.ignoreDifferences | toYaml | nindent 4 }}
+  {{ end }}
+---
+{{- end }}
+{{- end }}
