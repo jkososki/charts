@@ -1,0 +1,16 @@
+{{- range $name, $manifest := $.Values.manifests -}}
+{{- $obj := dict -}}
+{{- if eq (typeOf $manifest) "string" -}}
+  {{- $obj = tpl $manifest $ | fromYaml -}}
+{{- else -}}
+  {{- $obj = tpl (toYaml $manifest) $ | fromYaml -}}
+{{- end -}}
+
+{{- $meta := $obj.metadata | default dict -}}
+{{- $_ := set $meta "labels" (merge (dict) ($meta.labels | default dict) ($.Values.commonLabels | default dict)) -}}
+{{- $_ := set $obj "metadata" $meta -}}
+
+# Source: manifests.{{ $name }}
+{{ toYaml $obj }}
+---
+{{ end -}}
