@@ -7,7 +7,8 @@
 {{- end -}}
 
 {{- $meta := $obj.metadata | default dict -}}
-{{- $_ := set $meta "labels" (merge (dict) ($meta.labels | default dict) ($.Values.commonLabels | default dict)) -}}
+{{- $chartLabels := include "raw.labels" $ | fromYaml -}}
+{{- $_ := set $meta "labels" (merge (dict) ($meta.labels | default dict) ($.Values.commonLabels | default dict) $chartLabels) -}}
 {{- $_ := set $obj "metadata" $meta -}}
 
 # Source: manifests.{{ $name }}

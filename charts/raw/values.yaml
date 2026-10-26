@@ -1,5 +1,9 @@
-# -- Labels merged into metadata.labels of every rendered manifest.
-# Labels set on an individual manifest take precedence over these.
+# -- Labels merged into metadata.labels of every rendered manifest, in addition
+# to the standard chart labels from the "raw.labels" helper (helm.sh/chart,
+# app.kubernetes.io/name, instance, version, managed-by).
+# Precedence, highest first: labels set on an individual manifest, then
+# commonLabels, then "raw.labels". A key set at a higher level overrides the same
+# key from a lower one.
 # Example:
 #   commonLabels:
 #     app.kubernetes.io/part-of: my-app
