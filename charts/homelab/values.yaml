@@ -1,14 +1,11 @@
-environment: ""
-
 clusters:
   local: in-cluster
 
 gitRepositories:
-  forgeCoreweave: https://github.com/Sindri-Labs/forge-coreweave
-  forgeDeployment: https://github.com/Sindri-Labs/forge-deployment
+  homelab-apps:
 
 helmRegistries:
-  sindriHarbor: registry.sindri.app/charts
+  jkososki-gcr: jkososki.github.io/charts
 
 applications: {}
 
@@ -17,31 +14,31 @@ applications: {}
   # argocd:
   #   name: argocd
   #   project: infrastructure
-  #   valuesRepo: forgeDeployment
+  #   valuesRepo: homelabDeploy
   #   valuesPath: projects/infrastructure/gke/argo-cd
   #   chart:
   #     name: argo-cd
   #     targetRevision: 5.51.0
-  #     registry: sindriHarbor
+  #     registry: jkososki-gcr
   #   destination:
   #     namespace: argocd
   #     cluster: local
 
 
-installers:
-  forgeApplications:
-    disableAutoSync: true
-    valuesBranch: main
-    name: forge-applications
-    createProject: true
-    project: "{{ $.Values.environment }}-forge"
-    valuesRepo: https://github.com/Sindri-Labs/forge-deployment
-    valuesPath: projects/management/forge-applications
-    appPrefix: "{{ $.Values.environment }}"
-    chart:
-      name: sindrilabs/app-of-apps
-      targetRevision: 0.1.27
-      registry: registry-1.docker.io
-    destination:
-      namespace: argocd
-      cluster: local
+# installers:
+#   homelabApplications:
+#     disableAutoSync: true
+#     valuesBranch: main
+#     name: homelab-apps
+#     createProject: true
+#     project: "{{ $.Values.environment }}-homelab"
+#     valuesRepo: https://jkososki.github.io/charts/...
+#     valuesPath: projects/management/homelab-applications
+#     appPrefix: "{{ $.Values.environment }}"
+#     chart:
+#       name: homelab
+#       targetRevision: 0.1.27
+#       registry: registry-1.docker.io
+#     destination:
+#       namespace: argocd
+#       cluster: local

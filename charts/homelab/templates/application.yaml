@@ -38,8 +38,6 @@ spec:
       parameters:
       - name: environment
         value: {{ required "Missing vlaue for environment." $environment }}
-      - name: global.sindri_environment
-        value: {{ required "Missing vlaue for environment." $environment }}
       valueFiles:
       - $values/{{ $appVal.valuesPath }}/base.values.yaml
       - $values/{{ $appVal.valuesPath }}/env/{{ $environment }}.values.yaml
