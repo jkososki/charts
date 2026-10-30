@@ -1,5 +1,16 @@
 apiVersion: v1
 entries:
+  gateway-api:
+  - apiVersion: v2
+    appVersion: 1.6.3
+    created: "2026-10-30T01:20:32.54020985Z"
+    description: Deploys gateway-api
+    digest: 269031fe1b190cce8094b755baa78168a324f5a6f034d0af77ad79de1ef04ee8
+    name: gateway-api
+    type: application
+    urls:
+    - https://github.com/jkososki/charts/releases/download/gateway-api-1.6.3/gateway-api-1.6.3.tgz
+    version: 1.6.3
   homelab:
   - apiVersion: v2
     appVersion: 1.16.0
@@ -32,4 +43,4 @@ entries:
     urls:
     - https://github.com/jkososki/charts/releases/download/raw-0.1.0/raw-0.1.0.tgz
     version: 0.1.0
-generated: "2026-10-26T02:19:51.438194107Z"
+generated: "2026-10-30T01:20:32.745999373Z"
