@@ -1,0 +1,4 @@
+# Install the upstream ValidatingAdmissionPolicy that blocks installing
+# experimental-channel or pre-v1.5 Gateway API CRDs over these ones.
+safeUpgrades:
+  enabled: true

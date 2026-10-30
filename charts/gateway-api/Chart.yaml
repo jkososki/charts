@@ -1,0 +1,6 @@
+apiVersion: v2
+name: gateway-api
+description: Deploys gateway-api
+type: application
+version: 1.6.3
+appVersion: 1.6.3
