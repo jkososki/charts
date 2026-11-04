@@ -22,7 +22,7 @@ spec:
   {{- $projectName := include "apps-manager.prefixed" (list $project.prefix $project.name) }}
   project: {{ required (printf "Valid project required for %s" $appKey) $projectName }}
   sources:
-    {{- $helmRepo := (get $repos $appVal.chart.registry).url }}
+    {{- $helmRepo := (get $repos $appVal.chart.registry).stringData.url }}
     {{- if not $helmRepo }}
     {{- fail (printf "Valid chart.registry required for application: %s" $appKey) }}
     {{- end }}
@@ -39,8 +39,8 @@ spec:
         {{- end  }}
         valueFiles:
           - $values/{{ $appVal.valuesPath }}/base.values.yaml
-          - $values/{{ $appVal.valuesPath }}/env/{{ $appVal.valuesEnv }}.values.yaml
-    - repoURL: {{ $valuesRepo.url }}
+          - $values/{{ $appVal.valuesPath }}/env/{{ $.Values.valuesEnv }}.values.yaml
+    - repoURL: {{ $valuesRepo.stringData.url }}
       targetRevision: {{ required "Missing valuesBranch." $.Values.valuesBranch }}
       ref: values
   destination:
@@ -51,7 +51,7 @@ spec:
     {{- $automated := merge (default ($appVal.syncPolicy).automated dict) $automated }}
     automated:
       {{- toYaml $automated | nindent 6 }}
-    {{- $syncOptions := dict "CreateNamespace" true }}
+    {{- $syncOptions := dict "CreateNamespace" true "ServerSideApply" true }}
     {{- $syncOptions := merge (default ($appVal.syncPolicy).syncOptions dict) $syncOptions }}
     syncOptions:
     {{- range $k, $v := $syncOptions }}

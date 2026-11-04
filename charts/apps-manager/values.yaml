@@ -1,50 +1,119 @@
-# This is to override the chart name.
-fullnameOverride: ""
+# apps-manager: an Argo CD "app-of-apps" chart.
+#
+# From the values below the chart renders:
+#   - a repository Secret for each entry in `repositories` with `create: true`
+#   - an AppProject for each entry in `projects`
+#   - an Application for each entry in `applications` with `enabled: true`
+#
+# Entries in `repositories` and `projects` are referenced from other sections
+# by their map key (not by their `name`).
+
+# Overrides the chart name used in the `app.kubernetes.io/name` label.
 nameOverride: ""
+# Overrides the fully qualified release name. Currently not used by any template.
+fullnameOverride: ""
 
 # Argo CD Repositories
-# This section defines the repositories to which Argo CD will connect.
-# A map of strindata objects. The key is used as reference.
+# A map of <key>: <repository>. The key is how `valuesRepo` and
+# `applications.<app>.chart.registry` refer to the repository.
+#   name:       Secret name suffix; the Secret is created as `repo-<name>`.
+#   create:     When true, a repository Secret (labelled
+#               `argocd.argoproj.io/secret-type: repository`) is created in the
+#               release namespace. When false, the entry is only used as a lookup
+#               for its URL (e.g. the repo secret is managed elsewhere).
+#   stringData: Contents of the Secret. `url` is required, since Applications read
+#               it to build their sources. The block is rendered through `tpl`.
 # See https://argo-cd.readthedocs.io/en/stable/operator-manual/argocd-repositories-yaml/
+# ------------
+# repositories:
+#   homelabApps:
+#     name: homelab-apps
+#     create: true
+#     stringData:
+#       type: git
+#       url: https://github.com/<org>/<repo>.git
+#   argoHelm:
+#     name: argo-helm
+#     create: false
+#     stringData:
+#       type: helm
+#       url: https://argoproj.github.io/argo-helm
 repositories: {}
 
-# Repository for values files
+# Key of the entry in `repositories` that holds the Helm values files for every
+# application. It is added to each Application as a second source with `ref: values`.
 valuesRepo: ""
 
-# Branch to use for values
+# Git revision (branch, tag, or commit) of `valuesRepo` to read values files from.
 valuesBranch: main
 
+# The environment subpath (dev/stage/prod/etc.) that will be used to identify the
+# environment override files.
+valuesEnv: ""
+
 # Argo CD Projects
-# A map of projects. The key will be used for reference.
-# The spec is optional. If provided, must follow https://argo-cd.readthedocs.io/en/stable/operator-manual/project-specification/.
+# A map of <key>: <project>. The key is how `applications.<app>.project` refers
+# to the project.
+#   name:   Project name.
+#   prefix: Optional. When set, the AppProject is named `<prefix>-<name>`.
+#   spec:   Optional AppProject spec, see
+#           https://argo-cd.readthedocs.io/en/stable/operator-manual/project-specification/
+#           When omitted, a permissive spec is used (all source repos, all
+#           destinations, all cluster and namespaced resources).
+# ------------
 # projects:
-#   <proj-key>:
-#     name: string
-#     prefix: optional(string)
+#   infrastructure:
+#     name: infrastructure
+#     prefix: ""
 #     spec: {}
 projects: {}
 
-# Argo CD Application
-# A map of applications managed by the app-of-apps
+# Argo CD Applications
+# A map of <key>: <application> managed by the app-of-apps. Each enabled entry
+# becomes an Application in the `argocd` namespace that deploys a Helm chart to
+# the `in-cluster` destination, using values files from `valuesRepo`:
+#   $values/<valuesPath>/base.values.yaml
+#   $values/<valuesPath>/env/<valuesEnv>.values.yaml
+#
+#   enabled:              Only enabled applications are rendered.
+#   name:                 Application name.
+#   prefix:               Optional. When set, the Application is named `<prefix>-<name>`.
+#   project:              Key of the entry in `projects` (required).
+#   valuesPath:           Directory in `valuesRepo` containing the values files.
+#   valuesEnv:            Environment selecting `env/<valuesEnv>.values.yaml`.
+#   chart.name:           Helm chart name.
+#   chart.targetRevision: Helm chart version (required).
+#   chart.registry:       Key of the entry in `repositories` hosting the chart (required).
+#   destination.namespace: Namespace to deploy into (required). Created automatically.
+#   ignoreDifferences:    Optional list passed through to the Application spec.
+#   skipCrds:             When true, sets `helm.skipCrds` on the chart source.
+#   parameters:           Optional list of Helm parameters ({name, value}).
+#   revisionHistoryLimit: Defaults to 0.
+#   syncPolicy.automated: Merged into the automated sync policy, which defaults
+#                         to `prune: true`.
+#   syncPolicy.syncOptions: A map of <option>: <value> rendered as `<option>=<value>`.
+#                         `CreateNamespace: true` is always included by default.
 # ------------
-# argocd:
-#   enabled: true
-#   name: argocd
-#   prefix: ""
-#   project: infrastructure
-#   valuesRepo: homelabApps
-#   valuesPath: catalog/argocd
-#   valuesEnv: dev
-#   chart:
-#     name: argo-cd
-#     targetRevision: 10.11.6
-#     registry: https://argoproj.github.io/argo-helm
-#   destination:
-#     namespace: argocd
-#   ignoreDifferences: []
-#   skipCrds: false
-#   parameters: []
-#   revisionHistoryLimit: 0
-#   syncPolicy:
-#     automated: {}
+# applications:
+#   argocd:
+#     enabled: true
+#     name: argocd
+#     prefix: ""
+#     project: infrastructure
+#     valuesPath: catalog/argocd
+#     chart:
+#       name: argo-cd
+#       targetRevision: 10.11.6
+#       registry: argoHelm
+#     destination:
+#       namespace: argocd
+#     ignoreDifferences: []
+#     skipCrds: false
+#     parameters: []
+#     revisionHistoryLimit: 0
+#     syncPolicy:
+#       automated:
+#         selfHeal: true
+#       syncOptions:
+#         ServerSideApply: true
 applications: {}
