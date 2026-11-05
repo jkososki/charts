@@ -14,7 +14,6 @@ metadata:
     {{- include "apps-manager.labels" $ | nindent 4 }}
   annotations:
     argocd.argoproj.io/manifest-generate-paths: .
-    argocd.argoproj.io/compare-options: ServerSideDiff=true
 spec:
   {{- $project := get $projects $appVal.project }}
   {{- if not $project }}
