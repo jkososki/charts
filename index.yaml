@@ -3,6 +3,16 @@ entries:
   apps-manager:
   - apiVersion: v2
     appVersion: 0.0.0
+    created: "2026-11-10T23:48:08.810381557Z"
+    description: 'An app-of-apps for managing applications via argocd. '
+    digest: 73a36883fec2d6850ccf5601dceb655eb63ef6be85745bde56795db7c31ea853
+    name: apps-manager
+    type: application
+    urls:
+    - https://github.com/jkososki/charts/releases/download/apps-manager-0.1.5/apps-manager-0.1.5.tgz
+    version: 0.1.5
+  - apiVersion: v2
+    appVersion: 0.0.0
     created: "2026-11-05T01:24:41.94047997Z"
     description: 'An app-of-apps for managing applications via argocd. '
     digest: 2d7c762908cc90fe3244cd6a1dc316bbf16a8c36599eaef1e925aef07d4abcf6
@@ -63,4 +73,4 @@ entries:
     urls:
     - https://github.com/jkososki/charts/releases/download/raw-0.1.1/raw-0.1.1.tgz
     version: 0.1.1
-generated: "2026-11-05T01:24:41.940496922Z"
+generated: "2026-11-10T23:48:08.810401267Z"
