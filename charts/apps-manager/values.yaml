@@ -75,7 +75,6 @@ projects: {}
 #   $values/<valuesPath>/base.values.yaml
 #   $values/<valuesPath>/env/<valuesEnv>.values.yaml
 #
-#   enabled:              Only enabled applications are rendered.
 #   name:                 Application name.
 #   prefix:               Optional. When set, the Application is named `<prefix>-<name>`.
 #   project:              Key of the entry in `projects` (required).
@@ -117,3 +116,7 @@ projects: {}
 #       syncOptions:
 #         ServerSideApply: true
 applications: {}
+
+# A list of application keys that will be enabled.
+# Only applications on this list will be rendered.
+enabledApplications: []

@@ -1,8 +1,9 @@
 {{- $projects := .Values.projects -}}
 {{- $repos := .Values.repositories -}}
-{{- $valuesRepo := (get $repos .Values.valuesRepo) }}
-{{- range $appKey, $appVal := .Values.applications }}
-{{- if $appVal.enabled }}
+{{- $valuesRepo := (get $repos .Values.valuesRepo) -}}
+{{- $applications := .Values.applications }}
+{{- range $appKey := .Values.enabledApplications }}
+{{- $appVal := get $applications $appKey }}
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -62,5 +63,4 @@ spec:
   ignoreDifferences: {{ $appVal.ignoreDifferences | toYaml | nindent 4 }}
   {{ end }}
 ---
-{{- end }}
 {{- end }}

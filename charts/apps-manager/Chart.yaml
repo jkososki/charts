@@ -3,5 +3,5 @@ name: apps-manager
 description: |
   An app-of-apps for managing applications via argocd.
 type: application
-version: 0.1.4
+version: 0.1.5
 appVersion: "0.0.0"
