@@ -29,7 +29,9 @@ spec:
     {{- end }}
     - repoURL: {{ $helmRepo }}
       targetRevision: {{ required (printf "Missing chart.targetRevision for %s" $appKey) $appVal.chart.targetRevision }}
+      {{- if $appVal.chart.name }}
       chart: {{ $appVal.chart.name }}
+      {{- end }}
       helm:
         {{- if $appVal.skipCrds }}
         skipCrds: true
