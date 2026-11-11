@@ -23,15 +23,18 @@ spec:
   {{- $projectName := include "apps-manager.prefixed" (list $project.prefix $project.name) }}
   project: {{ required (printf "Valid project required for %s" $appKey) $projectName }}
   sources:
-    {{- $helmRepo := (get $repos $appVal.chart.registry).stringData.url }}
+    {{- $helmRepo := "" }}
+    {{- if $appVal.chart.oci }}
+    {{- $helmRepo = $appVal.chart.oci }}
+    {{- else }}
+    {{- $helmRepo = (get $repos $appVal.chart.registry).stringData.url }}
+    {{- end }}
     {{- if not $helmRepo }}
     {{- fail (printf "Valid chart.registry required for application: %s" $appKey) }}
     {{- end }}
     - targetRevision: {{ required (printf "Missing chart.targetRevision for %s" $appKey) $appVal.chart.targetRevision }}
-      {{- if $appVal.chart.oci }}
-      repoURL: {{ $appVal.chart.oci }}
-      {{- else }}
       repoURL: {{ $helmRepo }}
+      {{- if not $appVal.chart.oci }}
       chart: {{ $appVal.chart.name }}
       {{- end }}
       helm:
