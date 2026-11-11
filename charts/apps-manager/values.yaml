@@ -3,7 +3,7 @@
 # From the values below the chart renders:
 #   - a repository Secret for each entry in `repositories` with `create: true`
 #   - an AppProject for each entry in `projects`
-#   - an Application for each entry in `applications` with `enabled: true`
+#   - an Application for each key listed in `enabledApplications`
 #
 # Entries in `repositories` and `projects` are referenced from other sections
 # by their map key (not by their `name`).
@@ -69,9 +69,10 @@ valuesEnv: ""
 projects: {}
 
 # Argo CD Applications
-# A map of <key>: <application> managed by the app-of-apps. Each enabled entry
-# becomes an Application in the `argocd` namespace that deploys a Helm chart to
-# the `in-cluster` destination, using values files from `valuesRepo`:
+# A map of <key>: <application> managed by the app-of-apps. Each entry whose key
+# is listed in `enabledApplications` becomes an Application in the `argocd`
+# namespace that deploys a Helm chart to the `in-cluster` destination, using
+# values files from `valuesRepo`:
 #   $values/<valuesPath>/base.values.yaml
 #   $values/<valuesPath>/env/<valuesEnv>.values.yaml
 #
@@ -80,9 +81,13 @@ projects: {}
 #   project:              Key of the entry in `projects` (required).
 #   valuesPath:           Directory in `valuesRepo` containing the values files.
 #   valuesEnv:            Environment selecting `env/<valuesEnv>.values.yaml`.
-#   chart.name:           Helm chart name.
+#   chart.name:           Helm chart name. Ignored when `chart.oci` is set.
+#   chart.oci:            Optional. Full OCI chart URL (e.g. `oci://ghcr.io/<org>/charts/<chart>`).
+#                         When set, it is used as the source `repoURL` and no
+#                         `chart` field is rendered.
 #   chart.targetRevision: Helm chart version (required).
-#   chart.registry:       Key of the entry in `repositories` hosting the chart (required).
+#   chart.registry:       Key of the entry in `repositories` hosting the chart (required,
+#                         even when `chart.oci` is set).
 #   destination.namespace: Namespace to deploy into (required). Created automatically.
 #   ignoreDifferences:    Optional list passed through to the Application spec.
 #   skipCrds:             When true, sets `helm.skipCrds` on the chart source.
@@ -91,11 +96,11 @@ projects: {}
 #   syncPolicy.automated: Merged into the automated sync policy, which defaults
 #                         to `prune: true`.
 #   syncPolicy.syncOptions: A map of <option>: <value> rendered as `<option>=<value>`.
-#                         `CreateNamespace: true` is always included by default.
+#                         `CreateNamespace: true` and `ServerSideApply: true` are
+#                         included by default.
 # ------------
 # applications:
 #   argocd:
-#     enabled: true
 #     name: argocd
 #     prefix: ""
 #     project: infrastructure
