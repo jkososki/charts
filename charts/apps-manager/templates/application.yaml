@@ -34,7 +34,9 @@ spec:
     {{- end }}
     - targetRevision: {{ required (printf "Missing chart.targetRevision for %s" $appKey) $appVal.chart.targetRevision }}
       repoURL: {{ $helmRepo }}
-      {{- if not $appVal.chart.oci }}
+      {{- if $appVal.chart.oci }}
+      path: .
+      {{- else }}
       chart: {{ $appVal.chart.name }}
       {{- end }}
       helm:
