@@ -67,6 +67,12 @@ spec:
     {{- range $k, $v := $syncOptions }}
       - {{ printf "%s=%v" $k $v }}
     {{- end }}
+    {{- $syncPolicy := $appVal.syncPolicy }}
+    {{- $_ := unset $syncPolicy "automated" }}
+    {{- $_ := unset $syncPolicy "syncOptions" }}
+    {{- if $syncPolicy }}
+    {{- toYaml $syncPolicy | nindent 4 }}
+    {{- end }}
   revisionHistoryLimit: {{ $appVal.revisionHistoryLimit | default 0  }}
   {{ if $appVal.ignoreDifferences }}
   ignoreDifferences: {{ $appVal.ignoreDifferences | toYaml | nindent 4 }}
