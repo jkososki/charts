@@ -32,7 +32,7 @@ spec:
     {{- if not $helmRepo }}
     {{- fail (printf "Valid chart.registry required for application: %s" $appKey) }}
     {{- end }}
-    - targetRevision: {{ required (printf "Missing chart.targetRevision for %s" $appKey) $appVal.chart.targetRevision }}
+    - targetRevision: {{ required (printf "Missing chart.targetRevision for %s" $appKey) $appVal.chart.targetRevision | quote }}
       repoURL: {{ $helmRepo }}
       {{- if $appVal.chart.oci }}
       path: .
